@@ -1,0 +1,57 @@
+# ------------------------------------
+# 1. Configurações de Ambientes Python
+# ------------------------------------
+
+# Pasta do ambiente virtual local (VENV, a mais importante!)
+venv/
+.venv/
+env/
+
+# Arquivos de bytecode compilados
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+
+# ------------------------------------
+# 2. Arquivos de Banco de Dados e Logs
+# ------------------------------------
+
+# Arquivos de bancos de dados SQLite (se você usou antes do MySQL)
+*.db
+*.sqlite3
+
+# Arquivos de log gerados
+*.log
+/logs/
+
+
+# ------------------------------------
+# 3. Arquivos de Sistema Operacional (OS)
+# ------------------------------------
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+
+# ------------------------------------
+# 4. Arquivos do Flask e Sessão
+# ------------------------------------
+
+# Arquivos de dados de sessão
+.flasksession
+
+
+# ------------------------------------
+# 5. Arquivos de IDEs (Opcional, mas recomendado)
+# ------------------------------------
+
+# Visual Studio Code
+.vscode/
+
+# PyCharm
+.idea/

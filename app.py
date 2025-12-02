@@ -4,12 +4,9 @@ from models import Usuario, Veiculo, Locacao
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from sqlalchemy import or_
-
 from functools import wraps
-
-# --------------------------
-# DECORATORS DE AUTENTICAÇÃO
-# --------------------------
+from flask_migrate import Migrate
+migrate = Migrate(app, db)
 
 def login_required(func):
     @wraps(func)
@@ -19,12 +16,10 @@ def login_required(func):
         return func(*args, **kwargs)
     return wrapper
 
-
 def role_required(*roles):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            # *** CORREÇÃO ESSENCIAL: AGORA VERIFICA A CHAVE 'usuario_role' ***
             if "usuario_role" not in session: 
                 return redirect("/login")
 
@@ -35,11 +30,7 @@ def role_required(*roles):
         return wrapper
     return decorator
 
-# --------------------------
-# CONFIGURAÇÃO E ROTAS GERAIS
-# --------------------------
-
-app.secret_key = "SUA_CHAVE_SECRETA_AQUI"   # coloque qualquer string grande
+app.secret_key = "SUA_CHAVE_SECRETA_AQUI"  
 
 @app.route("/")
 def landing():
@@ -62,8 +53,10 @@ def login():
 
         if usuario and check_password_hash(usuario.senha_hash, senha):
             session["usuario_id"] = usuario.id
-            # *** CORREÇÃO: MANTEM A CHAVE 'usuario_role' PARA SER CONSISTENTE COM BASE.HTML E DECORATOR ***
-            session["usuario_role"] = usuario.role 
+            role_limpa = usuario.role.strip().lower() 
+            session["usuario_role"] = role_limpa 
+            
+            print(f"DEBUG - Login SUCESSO: Role salva na sessão: {role_limpa}")
 
             if usuario.role == "admin":
                 return redirect("/admin/usuarios")
@@ -90,7 +83,7 @@ def register():
 
         novo_usuario = Usuario(nome=nome, email=email)
         novo_usuario.set_senha(senha)
-        novo_usuario.role = "cliente" # Usuários se registram como clientes
+        novo_usuario.role = "cliente" 
 
         db.session.add(novo_usuario)
         db.session.commit()
@@ -99,20 +92,38 @@ def register():
         
     return render_template("register.html")
 
-# --------------------------
-# ROTAS DO ADMIN (USUÁRIOS)
-# --------------------------
+from models import Usuario, Veiculo, Locacao 
+
+@app.route("/admin") 
+@login_required
+@role_required("admin")
+def admin_dashboard():
+    total_clientes = Usuario.query.filter_by(role='cliente').count()
+    total_funcionarios = Usuario.query.filter_by(role='funcionario').count()
+    total_veiculos = Veiculo.query.count()
+    veiculos_disponiveis = Veiculo.query.filter_by(status='disponivel').count()
+    locacoes_ativas = Locacao.query.filter_by(status='ativa').count()
+    locacoes_pendentes = Locacao.query.filter_by(status='pendente').count()
+    
+    return render_template("admin/dashboard.html", 
+        total_clientes=total_clientes,
+        total_funcionarios=total_funcionarios,
+        total_veiculos=total_veiculos,
+        veiculos_disponiveis=veiculos_disponiveis,
+        locacoes_ativas=locacoes_ativas,
+        locacoes_pendentes=locacoes_pendentes
+    )
 
 @app.route("/admin/usuarios")
 @login_required
-@role_required("admin") # CORRIGIDO
+@role_required("admin") 
 def admin_usuarios_list():
     usuarios = Usuario.query.all()
     return render_template("admin/usuarios_list.html", usuarios=usuarios)
 
 @app.route("/admin/usuarios/novo", methods=["GET", "POST"])
 @login_required
-@role_required("admin") # CORRIGIDO
+@role_required("admin")
 def admin_usuarios_novo():
     if request.method == "POST":
         nome = request.form["nome"]
@@ -137,7 +148,7 @@ def admin_usuarios_novo():
 
 @app.route("/admin/usuarios/editar/<int:id>", methods=["GET", "POST"])
 @login_required
-@role_required("admin") # CORRIGIDO
+@role_required("admin") 
 def admin_usuarios_editar(id):
     usuario = Usuario.query.get_or_404(id)
 
@@ -158,7 +169,7 @@ def admin_usuarios_editar(id):
 
 @app.route("/admin/usuarios/excluir/<int:id>")
 @login_required
-@role_required("admin") # CORRIGIDO
+@role_required("admin")
 def admin_usuarios_excluir(id):
     usuario = Usuario.query.get_or_404(id)
     db.session.delete(usuario)
@@ -166,24 +177,19 @@ def admin_usuarios_excluir(id):
     flash("Usuário excluído com sucesso!", "success")
     return redirect(url_for("admin_usuarios_list"))
 
-# --------------------------
-# ROTAS DO ADMIN (VEÍCULOS)
-# --------------------------
-
 @app.route("/admin/veiculos")
 @login_required
-@role_required("admin", "funcionario") # CORRIGIDO
+@role_required("admin", "funcionario")
 def admin_veiculos():
     veiculos = Veiculo.query.all()
     return render_template("admin/veiculos/veiculos_list.html", veiculos=veiculos)
 
 @app.route("/admin/veiculos/novo", methods=["GET", "POST"])
 @login_required
-@role_required("admin", "funcionario") # CORRIGIDO
+@role_required("admin", "funcionario")
 def admin_veiculos_novo():
     if request.method == "POST":
         placa = request.form["placa"]
-        # Outros dados
         
         novo_veiculo = Veiculo(
             placa=placa,
@@ -204,7 +210,7 @@ def admin_veiculos_novo():
 
 @app.route("/admin/veiculos/<int:id>/editar", methods=["GET", "POST"])
 @login_required
-@role_required("admin", "funcionario") # CORRIGIDO
+@role_required("admin", "funcionario")
 def admin_veiculos_editar(id):
     veiculo = Veiculo.query.get_or_404(id)
 
@@ -225,7 +231,7 @@ def admin_veiculos_editar(id):
 
 @app.route("/admin/veiculos/<int:id>/excluir", methods=["POST"])
 @login_required
-@role_required("admin", "funcionario") # CORRIGIDO
+@role_required("admin", "funcionario")
 def admin_veiculos_excluir(id):
     veiculo = Veiculo.query.get_or_404(id)
     db.session.delete(veiculo)
@@ -233,21 +239,16 @@ def admin_veiculos_excluir(id):
     flash("Veículo excluído com sucesso!", "success")
     return redirect(url_for("admin_veiculos"))
 
-# --------------------------
-# ROTAS DO ADMIN (LOCAÇÕES)
-# --------------------------
-
 @app.route("/admin/locacoes")
 @login_required
-@role_required("admin", "funcionario") # CORRIGIDO
+@role_required("admin", "funcionario")
 def admin_locacoes():
     locacoes = Locacao.query.order_by(Locacao.data_inicio.desc()).all()
     return render_template("admin/locacoes/locacoes_list.html", locacoes=locacoes)
 
-# Adiciona rota de nova locação pelo painel
 @app.route("/admin/locacoes/nova", methods=["GET", "POST"])
 @login_required
-@role_required("admin", "funcionario") # CORRIGIDO
+@role_required("admin", "funcionario") 
 def admin_locacoes_nova():
     usuarios = Usuario.query.filter_by(role="cliente").all()
     veiculos = Veiculo.query.filter_by(status="disponivel").all()
@@ -255,7 +256,6 @@ def admin_locacoes_nova():
     if request.method == "POST":
         usuario_id = request.form.get("usuario_id")
         veiculo_id = request.form.get("veiculo_id")
-        # Note: datas como string no POST, converter
         data_inicio_str = request.form.get("data_inicio")
         data_fim_str = request.form.get("data_fim")
 
@@ -264,7 +264,6 @@ def admin_locacoes_nova():
         
         veiculo = Veiculo.query.get(veiculo_id)
 
-        # Validação de Conflito de Locação (Simplificada)
         conflito_locacao = Locacao.query.filter(
             Locacao.veiculo_id == veiculo_id,
             Locacao.status.in_(["pendente", "confirmada", "ativa"]),
@@ -276,7 +275,6 @@ def admin_locacoes_nova():
             flash("Este veículo já possui uma reserva ou locação ativa no período solicitado.", "danger")
             return redirect(url_for("admin_locacoes_nova"))
 
-        # Cálculo do valor
         dias = (data_fim - data_inicio).days + 1 
         valor_total = dias * veiculo.preco_diaria
 
@@ -286,11 +284,10 @@ def admin_locacoes_nova():
             data_inicio=data_inicio,
             data_fim=data_fim,
             valor_total=valor_total,
-            status="confirmada" # Locações criadas pelo admin/func são confirmadas diretamente
+            status="confirmada"
         )
 
         db.session.add(nova_locacao)
-        # O veículo deve ser marcado como alugado IMEDIATAMENTE após a criação/confirmação
         veiculo.status = "alugado"
         
         db.session.commit()
@@ -300,23 +297,18 @@ def admin_locacoes_nova():
     return render_template("admin/locacoes/locacoes_form.html", usuarios=usuarios, veiculos=veiculos)
 
 
-# *** CORREÇÃO: VERSÃO SEGURA E COMPLETA DA ROTA DE FINALIZAÇÃO (MANTIDA E CORRIGIDA) ***
 @app.route("/admin/locacoes/<int:id>/finalizar", methods=["POST"])
 @login_required
-@role_required("funcionario", "admin") # CORRIGIDO
+@role_required("funcionario", "admin") 
 def finalizar_locacao(id):
     loc = Locacao.query.get_or_404(id)
 
-    # Verifica se o status é passível de finalização
     if loc.status != "confirmada" and loc.status != "ativa":
         flash("A locação não pode ser finalizada neste status.", "danger")
         return redirect(url_for("admin_locacoes")) 
 
-    # 1. Muda o status da locação para finalizada
     loc.status = "finalizada"
     
-    # 2. Muda o status do veículo para 'disponivel'
-    # É mais seguro buscar o veículo pela locação, se o relacionamento estiver configurado
     loc.veiculo.status = "disponivel" 
     
     db.session.commit()
@@ -324,29 +316,22 @@ def finalizar_locacao(id):
     
     return redirect(url_for("admin_locacoes"))
 
-# *** ROTA DUPLICADA EXCLUÍDA: A rota 'admin_locacoes_finalizar' foi removida para evitar conflitos. ***
-
-# --------------------------
-# ROTAS DO CLIENTE
-# --------------------------
-
 @app.route("/cliente")
 @login_required
-@role_required("cliente") # CORRIGIDO
+@role_required("cliente") 
 def cliente_dashboard():
     return render_template("cliente/dashboard.html")
 
 @app.route("/cliente/veiculos")
 @login_required
-@role_required("cliente") # CORRIGIDO
+@role_required("cliente")
 def cliente_lista_veiculos():
     veiculos = Veiculo.query.filter_by(status="disponivel").all()
-    # Assume que o template é templates/cliente/veiculos_list.html
     return render_template("cliente/veiculos_list.html", veiculos=veiculos)
 
 @app.route("/cliente/solicitar_locacao/<int:veiculo_id>", methods=["GET", "POST"])
 @login_required
-@role_required("cliente") # CORRIGIDO
+@role_required("cliente") 
 def cliente_solicitar_locacao(veiculo_id):
     veiculo = Veiculo.query.get_or_404(veiculo_id)
     usuario_id = session.get("usuario_id")
@@ -355,7 +340,6 @@ def cliente_solicitar_locacao(veiculo_id):
         data_inicio_str = request.form.get("data_inicio")
         data_fim_str = request.form.get("data_fim")
 
-        # Validações de data
         try:
             data_inicio = datetime.strptime(data_inicio_str, '%Y-%m-%d')
             data_fim = datetime.strptime(data_fim_str, '%Y-%m-%d')
@@ -367,7 +351,6 @@ def cliente_solicitar_locacao(veiculo_id):
             flash("Datas de locação inválidas.", "danger")
             return redirect(url_for("cliente_solicitar_locacao", veiculo_id=veiculo_id))
 
-        # Validação de Conflito de Locação (Simplificada)
         conflito_locacao = Locacao.query.filter(
             Locacao.veiculo_id == veiculo_id,
             Locacao.status.in_(["pendente", "confirmada", "ativa"]),
@@ -379,8 +362,6 @@ def cliente_solicitar_locacao(veiculo_id):
             flash("Este veículo já possui uma reserva ou locação ativa no período solicitado.", "danger")
             return redirect(url_for("cliente_solicitar_locacao", veiculo_id=veiculo_id))
 
-        # Se passou por todas as validações:
-        # Incluir o dia de devolução no cálculo
         dias = (data_fim - data_inicio).days + 1 
         valor_total = dias * veiculo.preco_diaria
 
@@ -390,7 +371,7 @@ def cliente_solicitar_locacao(veiculo_id):
             data_inicio=data_inicio,
             data_fim=data_fim,
             valor_total=valor_total,
-            status="pendente" # O cliente SEMPRE gera uma solicitação 'pendente'
+            status="pendente" 
         )
 
         db.session.add(nova_locacao)
@@ -398,7 +379,6 @@ def cliente_solicitar_locacao(veiculo_id):
         flash("Solicitação de locação enviada com sucesso! Aguarde a confirmação do funcionário.", "success")
         return redirect(url_for("cliente_minhas_locacoes"))
 
-    # GET: Exibir o formulário
     return render_template("cliente/locacao_form.html", veiculo=veiculo, now=datetime.now())
 
 
@@ -407,13 +387,8 @@ def cliente_solicitar_locacao(veiculo_id):
 @role_required("cliente") 
 def cliente_minhas_locacoes():
     usuario_id = session.get("usuario_id")
-    # Busca locações do usuário, ordenadas da mais recente para a mais antiga
     locacoes = Locacao.query.filter_by(usuario_id=usuario_id).order_by(Locacao.data_inicio.desc()).all()
     return render_template("cliente/locacoes_list.html", locacoes=locacoes)
-
-# --------------------------
-# ROTAS DO FUNCIONÁRIO
-# --------------------------
 
 @app.route("/funcionario")
 @login_required
@@ -462,5 +437,4 @@ def funcionario_lista_veiculos():
 @role_required("funcionario", "admin") 
 def funcionario_lista_clientes():
     clientes = Usuario.query.filter_by(role="cliente").all()
-    # Assume que o template é templates/funcionario/clientes.html ou similar
     return render_template("funcionario/clientes.html", clientes=clientes)
