@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Bem-vindo(a) ao seu Painel de Cliente!</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Ver Veículos</h5>
+                    <p class="card-text">Confira nossa frota e solicite uma nova locação.</p>
+                    <a href="{{ url_for('cliente_lista_veiculos') }}" class="btn btn-primary">Acessar</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Minhas Locações</h5>
+                    <p class="card-text">Acompanhe suas solicitações e locações ativas.</p>
+                    <a href="{{ url_for('cliente_minhas_locacoes') }}" class="btn btn-primary">Acessar</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Atualizar Dados</h5>
+                    <p class="card-text">Gerencie suas informações pessoais (futuro).</p>
+                    <a href="#" class="btn btn-secondary disabled">Em breve</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

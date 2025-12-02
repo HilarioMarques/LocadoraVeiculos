@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>Nova Locação</h2>
+
+    <form method="POST">
+
+        <div class="mb-3">
+            <label class="form-label">Cliente</label>
+            <select name="usuario_id" class="form-select" required>
+                <option value="">Selecione...</option>
+                {% for u in usuarios %}
+                    <option value="{{ u.id }}">{{ u.nome }} ({{ u.email }})</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Veículo</label>
+            <select name="veiculo_id" class="form-select" required>
+                <option value="">Selecione...</option>
+                {% for v in veiculos %}
+                    <option value="{{ v.id }}">{{ v.marca }} {{ v.modelo }} - {{ v.placa }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Data início</label>
+            <input type="date" class="form-control" name="data_inicio" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Data fim</label>
+            <input type="date" class="form-control" name="data_fim" required>
+        </div>
+
+        <button class="btn btn-primary">Salvar</button>
+
+    </form>
+
+</div>
+
+{% endblock %}

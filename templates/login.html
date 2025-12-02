@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Locadora XPTO</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f0f2f5;
+            font-family: "Roboto", sans-serif;
+        }
+        .login-container {
+            max-width: 450px;
+            margin: 80px auto;
+            padding: 35px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        .brand-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1rem;
+        }
+        .register-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+
+    <div class="brand-title">Locadora 4 Marchas</div>
+
+    <form action="/login" method="POST">
+
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" name="email" placeholder="Digite seu email" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Senha</label>
+            <input type="password" class="form-control" name="senha" placeholder="Digite sua senha" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Entrar</button>
+    </form>
+
+    <div class="register-link">
+        <p>Não tem conta? <a href="/register">Crie uma conta</a></p>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

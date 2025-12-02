@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Veículos</h2>
+
+<table class="table table-bordered">
+    <tr>
+        <th>ID</th>
+        <th>Placa</th>
+        <th>Modelo</th>
+        <th>Status</th>
+    </tr>
+
+    {% for v in veiculos %}
+    <tr>
+        <td>{{ v.id }}</td>
+        <td>{{ v.placa }}</td>
+        <td>{{ v.modelo }}</td>
+        <td>{{ v.status }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

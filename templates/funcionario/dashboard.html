@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Painel do Funcionário{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Painel do Funcionário</h2>
+
+    <div class="row g-4">
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Solicitações Pendentes</h5>
+                    <p class="card-text">Analise e aprove ou rejeite locações.</p>
+                    <a href="{{ url_for('funcionario_locacoes_pendentes') }}" class="btn btn-warning">Analisar</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Gerenciar Veículos</h5>
+                    <p class="card-text">Visualize e gerencie a frota.</p>
+                    <a href="{{ url_for('funcionario_lista_veiculos') }}" class="btn btn-primary">Acessar Frota</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">**Finalizar Locações**</h5>
+                    <p class="card-text">Visualize locações ativas para devolução e finalizar.</p>
+                    <a href="{{ url_for('admin_locacoes') }}" class="btn btn-success">Gerenciar Locações</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Gerenciar Clientes</h5>
+                    <p class="card-text">Visualize e gerencie as contas dos clientes.</p>
+                    <a href="{{ url_for('funcionario_lista_clientes') }}" class="btn btn-secondary">Acessar Clientes</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

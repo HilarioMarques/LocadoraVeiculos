@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Solicitar Locação{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Solicitar Locação para {{ veiculo.marca }} {{ veiculo.modelo }}</h2>
+    <p>Placa: **{{ veiculo.placa }}** | Diária: **R$ {{ "%.2f"|format(veiculo.preco_diaria) }}**</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        
+        <input type="hidden" name="veiculo_id" value="{{ veiculo.id }}">
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="data_inicio" class="form-label">Data de Início da Locação</label>
+                <input type="date" 
+                       class="form-control" 
+                       id="data_inicio" 
+                       name="data_inicio" 
+                       min="{{ now.strftime('%Y-%m-%d') }}" 
+                       required>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="data_fim" class="form-label">Data de Fim da Locação</label>
+                <input type="date" 
+                       class="form-control" 
+                       id="data_fim" 
+                       name="data_fim" 
+                       min="{{ now.strftime('%Y-%m-%d') }}" 
+                       required>
+            </div>
+        </div>
+
+        <p class="text-muted mt-3">O cálculo do valor total será feito após a aprovação da sua solicitação.</p>
+
+        <button type="submit" class="btn btn-success btn-lg mt-3">Enviar Solicitação</button>
+        <a href="{{ url_for('cliente_lista_veiculos') }}" class="btn btn-secondary mt-3">Voltar</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Veículos Disponíveis{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Veículos Disponíveis</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for v in veiculos %}
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ v.marca }} {{ v.modelo }}</h5>
+                    <p class="card-text">
+                        **Placa:** {{ v.placa }} <br>
+                        **Ano:** {{ v.ano }} <br>
+                        **Categoria:** {{ v.categoria | capitalize }} <br>
+                        **Diária:** R$ {{ "%.2f"|format(v.preco_diaria) }} <br>
+                        **Status:** <span class="badge bg-{{ 'success' if v.status == 'disponivel' else 'warning' }}">{{ v.status | capitalize }}</span>
+                    </p>
+                </div>
+                <div class="card-footer text-center">
+                    {% if v.status == 'disponivel' %}
+                        <a href="{{ url_for('cliente_solicitar_locacao', veiculo_id=v.id) }}" class="btn btn-primary w-100">Solicitar Locação</a>
+                    {% else %}
+                        <button class="btn btn-secondary w-100" disabled>Indisponível</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if not veiculos %}
+        <div class="alert alert-info mt-4" role="alert">
+            Nenhum veículo disponível no momento.
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

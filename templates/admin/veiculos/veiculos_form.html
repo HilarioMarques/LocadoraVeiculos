@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>{{ 'Editar Veículo' if veiculo else 'Novo Veículo' }}</h2>
+
+<form method="POST">
+
+    <label>Modelo:</label>
+    <input type="text" name="modelo" class="form-control" required 
+        value="{{ veiculo.modelo if veiculo else '' }}">
+
+    <label>Marca:</label>
+    <input type="text" name="marca" class="form-control" required 
+        value="{{ veiculo.marca if veiculo else '' }}">
+    
+    <div class="mb-3">
+    <label class="form-label">Placa</label>
+    <input type="text" class="form-control" name="placa" 
+           placeholder="ABC-1234" 
+           value="{{ veiculo.placa if veiculo else '' }}" required>
+    </div>
+
+    <label>Ano:</label>
+    <input type="number" name="ano" class="form-control" required 
+        value="{{ veiculo.ano if veiculo else '' }}">
+
+    <label>Categoria:</label>
+    <select name="categoria" class="form-control" required>
+        <option value="carro" {% if veiculo and veiculo.categoria=='carro' %}selected{% endif %}>Carro</option>
+        <option value="moto" {% if veiculo and veiculo.categoria=='moto' %}selected{% endif %}>Moto</option>
+        <option value="outro" {% if veiculo and veiculo.categoria=='outro' %}selected{% endif %}>Outro</option>
+    </select>
+
+    <label>Status:</label>
+    <select name="status" class="form-control" required>
+        <option value="disponivel" {% if veiculo and veiculo.status=='disponivel' %}selected{% endif %}>Disponível</option>
+        <option value="manutencao" {% if veiculo and veiculo.status=='manutencao' %}selected{% endif %}>Manutenção</option>
+        <option value="alugado" {% if veiculo and veiculo.status=='alugado' %}selected{% endif %}>Alugado</option>
+    </select>
+
+    <label>Preço da diária:</label>
+    <input type="number" step="0.01" name="preco_diaria" class="form-control" required 
+        value="{{ veiculo.preco_diaria if veiculo else '' }}">
+
+    <br>
+    <button class="btn btn-success">Salvar</button>
+</form>
+
+{% endblock %}
